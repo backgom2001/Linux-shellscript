@@ -23,7 +23,7 @@ fi
 # rwx 권한 확인
 # -c : root 권한을 잠깐 얻어서 명령어만 실행함
 # $? : 최근 실행된 명령어
-CHECK2=`su - root -c 'find /etc/rsyslog.conf -perm 640'`
+CHECK2='find /etc/rsyslog.conf -perm 640'
 if [ -n "$CHECK2" ] ; then # 출력 문자열이 0이 아닌 경우
     OK $SYSLOGCONFFILE 의 권한 설정이 되어있습니다.
 else

@@ -16,7 +16,7 @@ BAR
 PASSFILE=/etc/passwd
  
 TMOUT_USER=$(awk -F: '$3 >= 1000 && $3 < 60000 {print $1}' $PASSFILE | head -1)
-TMOUT_OUTPUT=$(su - -c 'echo $TMOUT' $TMOUT_USER)
+TMOUT_OUTPUT=$($TMOUT_USER -c 'echo $TMOUT')
 if [ -z $TMOUT_OUTPUT ] ; then
 WARN 세션 타임아웃 설정이 되어 있지 않습니다.
 else
