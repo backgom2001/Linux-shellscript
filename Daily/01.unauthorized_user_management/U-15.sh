@@ -1,40 +1,30 @@
 #!/bin/bash
 
+# log파일로 해당 진단 내용 파일 생성
 . function.sh
-
 TMP1=`SCRIPTNAME`.log
 > $TMP1
-TMP2=/tmp/tmp1
+
 BAR
-CODE [U-15] Session Timeout 설정
+CODE [ U-15 ] world writable 파일 점검
 cat << EOF >> $RESULT
-[양호]: Session Timeout이 600초(10분) 이하로 설정되어 있는 경우
-[취약]: Session Timeout이 600초(10분) 이하로 설정되지 않은 경우
+[ 양호 ] : 홈 디렉터리 환경변수 파일의 소유자가 root 또는, 해당 계정으로 지정되어 있고, 홈 디렉터리 환경변수 파일에 root와 소유자만 쓰기 권한이 부여 된 경우
+[ 취약 ] : 홈 디렉터리 환경변수 파일의 소유자가 root 또는, 해당 계정으로 지정되지 않고, 홈 디렉터리 환경변수 파일에 root와 소유자 외에 쓰기 권한이 부
+여된 경우
 EOF
 BAR
 
-PASSFILE=/etc/passwd
- 
-TMOUT_USER=$(awk -F: '$3 >= 1000 && $3 < 60000 {print $1}' $PASSFILE | head -1)
-TMOUT_OUTPUT=$($TMOUT_USER -c 'echo $TMOUT')
-if [ -z $TMOUT_OUTPUT ] ; then
-WARN 세션 타임아웃 설정이 되어 있지 않습니다.
+INFO $TMP1 파일을 확인해야 합니다.
+# ex) rwxrwxrwx root root [파일명]
+find / -perm -2 -ls >> $TMP1 2>&1
+
+if [ -s $TMP1 ] ; then
+    WARN $TMP1 파일을 참고하여 설정을 변경해야 합니다.
 else
-INFO 세션 타임아웃 설정이 되어 있습니다.
-if [ $TMOUT_OUTPUT -le 600 ] ; then
-OK "세션 타임아웃이 600초(10분) 이하로 설정되어 있습니다."
-else
-WARN "세션 타임아웃이 600초(10분) 이하로 설정되지 않았습니다."
+    OK world writable 파일이 없습니다.
+    rm $TMP1
 fi
-INFO $TMP1 파일을 참고 하십시오.
 
-echo "========================================================" >> $TMP1
-
-echo "1. 무작위로 선출된 사용자 $TMOUT_USER의 TMOUT 변수 설정 확인" >> $TMP1
-
-echo "" >> $TMP1
-echo "$TMOUT_USER's \$TMOUT = $TMOUT_OUTPUT" >> $TMP1
-echo "========================================================" >> $TMP1
-fi
 cat $RESULT
-echo ; echo
+echo;
+
